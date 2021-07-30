@@ -24,9 +24,9 @@ const inputReducer = (state, action) => {
 //USE FORMIK LIBRARY IN THE FUTURE
 const Input = (props) => {
   const [inputState, dispatch] = useReducer(inputReducer, {
-    value: '',
+    value: props.initialValue || '',
     isTouched: false,
-    isValid: false,
+    isValid: props.initialValid || false,
   });
 
   const {id,onInput} = props
@@ -34,11 +34,11 @@ const Input = (props) => {
   useEffect(() => {
     props.onInput(id,value,isValid);
   },[id,value,isValid,onInput]);
-
+  
   const changeHandler = (event) => {
     dispatch({ type: "CHANGE", val: event.target.value, validators: props.validators });
   };
-
+  
   const touchHandler = () =>
   {
       dispatch({type: 'TOUCH'});
@@ -63,7 +63,6 @@ const Input = (props) => {
         value={inputState.value}
       />
     );
-
   return (
     <div
       className={`form-control ${
