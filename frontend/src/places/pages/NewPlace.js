@@ -10,7 +10,7 @@ import { useForm } from "../../shared/hooks/form-hook";
 import "./PlaceForm.css";
 
 const NewPlace = () => {
-  const [formState,inputHandler] = useForm(
+  const [formState, inputHandler] = useForm(
     {
       title: {
         value: " ",
@@ -29,7 +29,6 @@ const NewPlace = () => {
   );
 
   //USECALL BACK TO AVOID INFINITE LOOPS
-
 
   const placeSubmitHandler = (event) => {
     event.preventDefault();
