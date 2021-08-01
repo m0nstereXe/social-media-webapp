@@ -1,0 +1,19 @@
+.auth-form {
+    list-style: none;
+    margin: 0 auto;
+    padding: 1rem;
+    width: 90%;
+    max-width: 40rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.26);
+    border-radius: 6px;
+    background: white;
+}
+
+.auth-form__actions button,
+.auth-form__actions a {
+  margin: 0.5rem;
+}
+.auth-form__error
+{
+    color: red;
+}
