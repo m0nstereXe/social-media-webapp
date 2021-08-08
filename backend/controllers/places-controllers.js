@@ -52,7 +52,6 @@ const getPlaceById = (req, res, next) => {
 const getPlacesByUserId = (req, res, next) => {
   const userId = req.params.uid;
   const places = DUMMY_PLACES.filter((p) => {
-    console.log(p.creator + " " + userId);
     return p.creator === userId;
   });
   if (!places || places.length === 0) {
