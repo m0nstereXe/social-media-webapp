@@ -1,35 +1,36 @@
-const HttpError = require('../models/http-error');
+const HttpError = require("../models/http-error");
+const { v4: uuid } = require("uuid");
 
 const DUMMY_PLACES = [
-    {
-      id: "p1",
-      title: "Empire State Building",
-      description: "big huge tower!!!!!",
-      imageUrl: "https://images.emojiterra.com/twitter/v13.0/512px/1f9a7.png",
-      address: "376 Lakeview Drive, Wyckoff NJ",
-      location: {
-        lat: 40.9894912,
-        lng: -74.1605376,
-      },
-      creator: "u1",
+  {
+    id: "p1",
+    title: "Empire State Building",
+    description: "big huge tower!!!!!",
+    imageUrl: "https://images.emojiterra.com/twitter/v13.0/512px/1f9a7.png",
+    address: "376 Lakeview Drive, Wyckoff NJ",
+    location: {
+      lat: 40.9894912,
+      lng: -74.1605376,
     },
-    {
-      id: "p2",
-      title: "Poop",
-      description: "look at this cool stuff!",
-      imageUrl:
-        "https://hips.hearstapps.com/edc.h-cdn.co/assets/16/45/1478626107-white-house-driveway.jpg",
-      address: "1600 Pensylvania Ave, Washington DC",
-      location: {
-        lat: 38.8977,
-        lng: -77.0365,
-      },
-      creator: "u2",
+    creator: "u1",
+  },
+  {
+    id: "p2",
+    title: "Poop",
+    description: "look at this cool stuff!",
+    imageUrl:
+      "https://hips.hearstapps.com/edc.h-cdn.co/assets/16/45/1478626107-white-house-driveway.jpg",
+    address: "1600 Pensylvania Ave, Washington DC",
+    location: {
+      lat: 38.8977,
+      lng: -77.0365,
     },
-  ];
+    creator: "u2",
+  },
+];
 
 const printLigma = () => {
-    console.log('LIGMA');
+  console.log("LIGMA");
 };
 
 const getPlaceById = (req, res, next) => {
@@ -64,6 +65,21 @@ const getPlaceByUserId = (req, res, next) => {
   res.json({ places: places });
 };
 
+const createPlace = (req, res, next) => {
+  const { title, description, coordinates, address, creator } = req.body;
+  const createdPlace = {
+    id : uuid(),
+    title,
+    description,
+    location: coordinates,
+    address,
+    creator,
+  };
+  DUMMY_PLACES.push(createdPlace);
+  res.status(201).json({place: createdPlace}); //we created da thingy!!!!
+};
+
 exports.getPlaceById = getPlaceById;
 exports.getPlaceByUserId = getPlaceByUserId;
+exports.createPlace = createPlace;
 exports.printLigma = printLigma;

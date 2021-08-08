@@ -9,10 +9,12 @@ const placesControllers = require('../controllers/places-controller.js');
 
 
 
-
+router.post('/',placesControllers.createPlace);
 
 router.get("/:pid", placesControllers.getPlaceById);
 
 router.get("/users/:uid", placesControllers.getPlaceByUserId);
+
+
 
 module.exports = router;
