@@ -15,6 +15,8 @@ router.get("/:pid", placesControllers.getPlaceById);
 
 router.get("/users/:uid", placesControllers.getPlaceByUserId);
 
+router.patch('/:pid',placesControllers.updatePlaceById);
 
+router.delete('/:pid',placesControllers.deletePlaceById);
 
 module.exports = router;
