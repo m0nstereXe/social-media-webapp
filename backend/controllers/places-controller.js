@@ -49,15 +49,15 @@ const getPlaceById = (req, res, next) => {
   res.json({ place: place });
 };
 
-const getPlaceByUserId = (req, res, next) => {
+const getPlacesByUserId = (req, res, next) => {
   const userId = req.params.uid;
-  const places = DUMMY_PLACES.find((p) => {
+  const places = DUMMY_PLACES.filter((p) => {
     console.log(p.creator + " " + userId);
     return p.creator === userId;
   });
-  if (!places) {
+  if (!places || places.length === 0) {
     const error = new HttpError(
-      "Could not find a place for the provided user ID",
+      "Could not find places for the provided user ID",
       404
     );
     return next(error);
@@ -117,7 +117,7 @@ const deletePlaceById = (req, res, next) => {
 };
 
 exports.getPlaceById = getPlaceById;
-exports.getPlaceByUserId = getPlaceByUserId;
+exports.getPlacesByUserId = getPlacesByUserId;
 exports.updatePlaceById = updatePlaceById;
 exports.deletePlaceById = deletePlaceById;
 exports.createPlace = createPlace;

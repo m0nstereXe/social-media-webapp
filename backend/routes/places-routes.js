@@ -13,7 +13,7 @@ router.post('/',placesControllers.createPlace);
 
 router.get("/:pid", placesControllers.getPlaceById);
 
-router.get("/users/:uid", placesControllers.getPlaceByUserId);
+router.get("/users/:uid", placesControllers.getPlacesByUserId);
 
 router.patch('/:pid',placesControllers.updatePlaceById);
 
