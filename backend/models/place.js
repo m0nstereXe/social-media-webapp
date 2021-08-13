@@ -12,7 +12,8 @@ const placeSchema = new Schema({
         lat: {type: Number, required: true},
         lng: {type: Number, required: true}
     },
-    creator: {type: String, required: true},
+    //connects it to users db and makes sure the creator id is of the ID type
+    creator: {type: mongoose.Types.ObjectId, required: true, ref: 'User'},
 });
 
 //exports a constructor that will create models based on the schema above

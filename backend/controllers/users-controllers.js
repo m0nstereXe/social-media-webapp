@@ -37,7 +37,7 @@ const signup = async (req, res, next) => {
     return next(new HttpError("Make sure inputs are valid!!!!", 422));
   }
 
-  const { name, email, password, places } = req.body;
+  const { name, email, password } = req.body;
 
   let existingUser;
   try {
@@ -54,17 +54,21 @@ const signup = async (req, res, next) => {
     image:
       "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/160/twitter/233/orangutan_1f9a7.png",
     password,
-    places,
+    places: []
   });
+
+  console.log(createdUser);
 
   try {
     await createdUser.save();
   } catch (error) {
+    //console.log(error);
     return next(new HttpError("Signing up failed please try again", 500));
   }
 
   res.status(201).json({ user: createdUser.toObject({ getters: true }) });
 };
+
 const login = async (req, res, next) => {
   const { email, password } = req.body;
 
