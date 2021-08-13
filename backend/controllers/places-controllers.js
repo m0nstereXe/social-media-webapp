@@ -3,13 +3,13 @@ const { validationResult } = require("express-validator");
 const { v4: uuid } = require("uuid");
 
 const getCoordsForAddress = require("../util/location");
+const Place = require("../models/place"); //importing a constructor for our mongoose place model
 
 let DUMMY_PLACES = [
   {
     id: "p1",
     title: "Empire State Building",
     description: "big huge tower!!!!!",
-    imageUrl: "https://images.emojiterra.com/twitter/v13.0/512px/1f9a7.png",
     address: "376 Lakeview Drive, Wyckoff NJ",
     location: {
       lat: 40.9894912,
@@ -21,8 +21,6 @@ let DUMMY_PLACES = [
     id: "p2",
     title: "Poop",
     description: "look at this cool stuff!",
-    imageUrl:
-      "https://hips.hearstapps.com/edc.h-cdn.co/assets/16/45/1478626107-white-house-driveway.jpg",
     address: "1600 Pensylvania Ave, Washington DC",
     location: {
       lat: 38.8977,
@@ -36,27 +34,47 @@ const printLigma = () => {
   console.log("LIGMA");
 };
 
-const getPlaceById = (req, res, next) => {
+const getPlaceById = async (req, res, next) => {
   const placeId = req.params.pid;
-  const place = DUMMY_PLACES.find((p) => {
-    return p.id === placeId;
-  });
 
+  let place;
+  try {
+    //A static method using the Place Model Class to find stuff
+    place = await Place.findById(placeId);
+  } catch (error) {
+    //catching error if the request to the server goes wrong
+    return next(
+      new HttpError("Something went wrong, could not find a place", 500)
+    );
+  }
+
+  //catches error if the server doesn't send us back a place but the request was fine
   if (!place) {
     const error = new HttpError(
       "Could not find a place for the provided ID",
       404
     );
-    throw error;
+    return next(error);
   }
-  res.json({ place: place });
+  //returns mongoose object to a converted object with its id normally defined
+  res.json({ place: place.toObject({ getters: true }) });
 };
 
-const getPlacesByUserId = (req, res, next) => {
+const getPlacesByUserId = async (req, res, next) => {
   const userId = req.params.uid;
-  const places = DUMMY_PLACES.filter((p) => {
-    return p.creator === userId;
-  });
+
+  let places;
+  try {
+    places = await Place.find({ creator: userId });
+  } catch (error) {
+    return next(
+      new HttpError(
+        "Something went wrong. Could not find places by userId",
+        500
+      )
+    );
+  }
+
   if (!places || places.length === 0) {
     const error = new HttpError(
       "Could not find places for the provided user ID",
@@ -64,14 +82,21 @@ const getPlacesByUserId = (req, res, next) => {
     );
     return next(error);
   }
-  res.json({ places: places });
+  console.log(places);
+  // since places is an array we use .map 
+  // to call .object getters true on every item in the array and get a new array
+  res.json({
+    places: places.map((place) => place.toObject({ getters: true })),
+  });
 };
 
 const createPlace = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     console.log(errors);
-    return next(HttpError("Invalid inputs passed, please check your data", 422));
+    return next(
+      HttpError("Invalid inputs passed, please check your data", 422)
+    );
   }
   const { title, description, address, creator } = req.body;
   let coordinates;
@@ -81,15 +106,25 @@ const createPlace = async (req, res, next) => {
     return next(error); //if getCoordsFor address go next with error
   }
 
-  const createdPlace = {
-    id: uuid(),
+  //creates a new instance of the place model
+  const createdPlace = new Place({
     title,
     description,
-    location: coordinates,
     address,
+    location: coordinates,
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Tour_Eiffel_Wikimedia_Commons.jpg/200px-Tour_Eiffel_Wikimedia_Commons.jpg",
     creator,
-  };
-  DUMMY_PLACES.push(createdPlace);
+  });
+
+  //saves our place model to the database
+  try {
+    await createdPlace.save();
+  } catch (error) {
+    //in the case it doesnt work pass an error to the error handling middleware
+    return next(new HttpError("Creating Place Failed.", 500));
+  }
+
   res.status(201).json({ place: createdPlace }); //we created da thingy!!!!
 };
 
