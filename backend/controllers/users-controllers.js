@@ -2,6 +2,8 @@ const { v4: uuid } = require("uuid");
 const { validationResult } = require("express-validator");
 
 const HttpError = require("../models/http-error");
+const User = require("../models/user");
+
 const DUMMY_USERS = [
   {
     id: "u1",
@@ -14,29 +16,41 @@ const DUMMY_USERS = [
 const getUsers = (req, res, next) => {
   res.status(200).json({ users: DUMMY_USERS });
 };
-const signup = (req, res, next) => {
+const signup = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     console.log(errors);
-    throw new HttpError("Make sure inputs are valid!!!!", 422);
+    return  next(new HttpError("Make sure inputs are valid!!!!", 422));
   }
 
-  const { name, email, password } = req.body;
+  const { name, email, password,places } = req.body;
 
-  const hasUser = DUMMY_USERS.find((u) => u.email === email);
-  if (hasUser) {
-    throw new HttpError("Could not create user, email already in use", 422);
+  let existingUser;
+  try {
+    existingUser = await User.findOne({ email: email });
+  } catch (error) {
+    return next(new HttpError('Signing up Failed. Try again later!',500));
   }
-
-  const createdUser = {
-    id: uuid(),
+  if(existingUser)
+  {
+    return next(new HttpError('User exists Already',422));
+  }
+  const createdUser = new User({
     name,
     email,
+    image: 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/160/twitter/233/orangutan_1f9a7.png',
     password,
-  };
-  DUMMY_USERS.push(createdUser);
+    places
+  });
 
-  res.status(201).json({ user: createdUser });
+  try {
+    await createdUser.save();
+  } catch(error)
+  {
+    return next(new HttpError('Signing up failed please try again',500));
+  }
+
+  res.status(201).json({ user: createdUser.toObject({getters: true}) });
 };
 const login = (req, res, next) => {
   const { email, password } = req.body;
