@@ -6,35 +6,8 @@ const mongoose = require("mongoose");
 const getCoordsForAddress = require("../util/location");
 const Place = require("../models/place"); //importing a constructor for our mongoose place model
 const User = require("../models/user");
+const user = require("../models/user");
 
-let DUMMY_PLACES = [
-  {
-    id: "p1",
-    title: "Empire State Building",
-    description: "big huge tower!!!!!",
-    address: "376 Lakeview Drive, Wyckoff NJ",
-    location: {
-      lat: 40.9894912,
-      lng: -74.1605376,
-    },
-    creator: "u1",
-  },
-  {
-    id: "p2",
-    title: "Poop",
-    description: "look at this cool stuff!",
-    address: "1600 Pensylvania Ave, Washington DC",
-    location: {
-      lat: 38.8977,
-      lng: -77.0365,
-    },
-    creator: "u2",
-  },
-];
-
-const printLigma = () => {
-  console.log("LIGMA");
-};
 
 const getPlaceById = async (req, res, next) => {
   const placeId = req.params.pid;
@@ -65,9 +38,10 @@ const getPlaceById = async (req, res, next) => {
 const getPlacesByUserId = async (req, res, next) => {
   const userId = req.params.uid;
 
-  let places;
+  // let places;
+  let userWithPlaces
   try {
-    places = await Place.find({ creator: userId });
+    userWithPlaces = await User.findById(userId).populate('places');
   } catch (error) {
     return next(
       new HttpError(
@@ -76,19 +50,17 @@ const getPlacesByUserId = async (req, res, next) => {
       )
     );
   }
-
-  if (!places || places.length === 0) {
+  if (!userWithPlaces || userWithPlaces.places.length === 0) {
     const error = new HttpError(
       "Could not find places for the provided user ID",
       404
     );
     return next(error);
   }
-  console.log(places);
   // since places is an array we use .map
   // to call .object getters true on every item in the array and get a new array
   res.json({
-    places: places.map((place) => place.toObject({ getters: true })),
+    places: userWithPlaces.places.map((place) => place.toObject({ getters: true })),
   });
 };
 
@@ -113,7 +85,7 @@ const createPlace = async (req, res, next) => {
     title,
     description,
     address,
-    location: coordinates,
+    location: coordinates, 
     image:
       "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Tour_Eiffel_Wikimedia_Commons.jpg/200px-Tour_Eiffel_Wikimedia_Commons.jpg",
     creator,
@@ -191,15 +163,25 @@ const deletePlaceById = async (req, res, next) => {
 
   let place;
   try {
-    place = await Place.findById(placeId);
+    place = await Place.findById(placeId).populate('creator');
   } catch (error) {
     return next(
       new HttpError("Something went wrong, could not delete place", 500)
     );
   }
 
+  if(!place)
+  {
+    return next(new HttpError('We could not find a place for this ID',404));
+  }
+
   try {
-    place.remove();
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    await place.remove({session: session});
+    await place.creator.places.pull(place);
+    await place.creator.save({session: session});
+    await session.commitTransaction();
   } catch (error) {
     return next(
       new HttpError("Something went wrong, could not delete place", 500)
@@ -214,4 +196,3 @@ exports.getPlacesByUserId = getPlacesByUserId;
 exports.updatePlaceById = updatePlaceById;
 exports.deletePlaceById = deletePlaceById;
 exports.createPlace = createPlace;
-exports.printLigma = printLigma;
