@@ -8,13 +8,13 @@ const getUsers = async (req, res, next) => {
   //should prob use the cursor here instead but whatever
   let users;
   try {
-    //only asking for email and name and not password
-    users = await User.find({}, "name email");
+    users = await User.find({}, "name email places image");
   } catch (error) {
     return next(
       new HttpError("Fetching users failed please try again later!!!", 500)
     );
   }
+  console.log(users);
   res.json({
     users: users.map((u) => {
       return u.toObject({ getters: true });
