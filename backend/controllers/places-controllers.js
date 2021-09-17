@@ -69,7 +69,7 @@ const createPlace = async (req, res, next) => {
   if (!errors.isEmpty()) {
     console.log(errors);
     return next(
-      HttpError("Invalid inputs passed, please check your data", 422)
+      new HttpError("Invalid inputs passed, please check your data", 422)
     );
   }
   const { title, description, address, creator } = req.body;
@@ -77,6 +77,7 @@ const createPlace = async (req, res, next) => {
   try {
     coordinates = await getCoordsForAddress(address);
   } catch (error) {
+    console.log("We reach this error");
     return next(error); //if getCoordsFor address go next with error
   }
 
@@ -129,7 +130,7 @@ const updatePlaceById = async (req, res, next) => {
   if (!errors.isEmpty()) {
     console.log(errors);
     return next(
-      HttpError("Invalid inputs passed, please check your data", 422)
+      new HttpError("Invalid inputs passed, please check your data", 422)
     );
   }
   const placeId = req.params.pid;
