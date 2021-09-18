@@ -33,7 +33,7 @@ const PlaceItem = (props) => {
   const closeMapHandler = () => {
     setShowMap(false);
   };
-
+  //console.log("THE ID " + props.id);
   return (
     <React.Fragment>
       <Modal

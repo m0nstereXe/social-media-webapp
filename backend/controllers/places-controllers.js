@@ -11,7 +11,7 @@ const user = require("../models/user");
 
 const getPlaceById = async (req, res, next) => {
   const placeId = req.params.pid;
-
+  console.log("Reached right path");
   let place;
   try {
     //A static method using the Place Model Class to find stuff

@@ -16,6 +16,7 @@ const PlaceList = (props) => {
       </div>
     );
   }
+  // console.log(props.items);
   return (
     <ul className="place-list">
       {props.items.map((place) => {
