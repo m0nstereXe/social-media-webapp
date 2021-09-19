@@ -1,4 +1,4 @@
-import React, { useEffect, useState,useContext } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useParams } from "react-router";
 import { useHistory } from "react-router-dom";
 
@@ -18,9 +18,10 @@ import "./PlaceForm.css";
 
 const UpdatePlace = (props) => {
   const { isLoading, error, sendRequest, clearError } = useHttpClient();
-  //const [loadedPlace,setLoadedPlace] = useState();
+  const [loadedPlace, setLoadedPlace] = useState();
   const placeId = useParams().placeId;
 
+  const history = useHistory();
   const auth = useContext(AuthContext);
 
   const [formState, inputHandler, setFormData] = useForm(
@@ -37,7 +38,34 @@ const UpdatePlace = (props) => {
     false
   );
 
-  const history = useHistory();
+  useEffect(() => {
+    const fetchPlace = async () => {
+      try {
+        const responseData = await sendRequest(
+          `http://localhost:5000/api/places/${placeId}`
+        );
+        setLoadedPlace(responseData.place);
+        setFormData(
+          {
+            title: {
+              value: responseData.place.title,
+              isValid: true,
+            },
+            description: {
+              value: responseData.place.description,
+              isValid: true,
+            },
+          },
+          true
+        );
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchPlace();
+  }, [sendRequest, placeId, setFormData]);
+
+  
 
   const placeUpdateSubmitHandler = async (event) => {
     event.preventDefault();
@@ -56,43 +84,44 @@ const UpdatePlace = (props) => {
     console.log(formState.inputs);
   };
 
-  if (isLoading) {
-    return (
-      <div className="center">
-        <h2>Loading...</h2>
-      </div>
-    );
-  }
+
 
   return (
     <React.Fragment>
       <ErrorModal error={error} onClear={clearError} />
-      <form className="place-form" onSubmit={placeUpdateSubmitHandler}>
-        {isLoading && <LoadingSpinner asOverlay />}
-        <Input
-          id="title"
-          element="input"
-          label="Title"
-          validators={[VALIDATOR_REQUIRE()]}
-          errorText="Please enter a valid title."
-          onInput={inputHandler}
-          initialValue={formState.inputs.title.value}
-          initialValid={formState.inputs.title.isValid}
-        />
-        <Input
-          id="description"
-          element="textarea"
-          label="Description"
-          validators={[VALIDATOR_REQUIRE(), VALIDATOR_MINLENGTH(5)]}
-          errorText="Please enter a valid description (min length of 5)."
-          onInput={inputHandler}
-          initialValue={formState.inputs.description.value}
-          initialValid={formState.inputs.description.isValid}
-        />
-        <Button type="submit" disabled={!formState.isValid}>
-          UPDATE PLACE
-        </Button>
-      </form>
+      {!loadedPlace && !error && <div className="center">
+        <Card>
+          <h2>Could not find a place.</h2>
+        </Card>
+      </div>}
+      {!isLoading && loadedPlace && (
+        <form className="place-form" onSubmit={placeUpdateSubmitHandler}>
+          {isLoading && <LoadingSpinner asOverlay />}
+          <Input
+            id="title"
+            element="input"
+            label="Title"
+            validators={[VALIDATOR_REQUIRE()]}
+            errorText="Please enter a valid title."
+            onInput={inputHandler}
+            initialValue={loadedPlace.title}
+            initialValid={true}
+          />
+          <Input
+            id="description"
+            element="textarea"
+            label="Description"
+            validators={[VALIDATOR_REQUIRE(), VALIDATOR_MINLENGTH(5)]}
+            errorText="Please enter a valid description (min length of 5)."
+            onInput={inputHandler}
+            initialValue={loadedPlace.description}
+            initialValid={true}
+          />
+          <Button type="submit" disabled={!formState.isValid}>
+            UPDATE PLACE
+          </Button>
+        </form>
+      )}
     </React.Fragment>
   );
 };
