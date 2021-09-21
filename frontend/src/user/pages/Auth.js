@@ -1,6 +1,7 @@
 import React, { useState, useContext } from "react";
 
 import { useHttpClient } from "../../shared/hooks/http-hook";
+import ImageUpload from "../../shared/FormElements/ImageUpload";
 import Input from "../../shared/FormElements/Input";
 import Button from "../../shared/FormElements/Button";
 import ErrorModal from "../../shared/components/UIElements/ErrorModal";
@@ -43,6 +44,7 @@ const Auth = (props) => {
         {
           ...formState.inputs,
           name: undefined,
+          image: undefined
         },
         formState.inputs.email.isValid && formState.inputs.password.isValid
       );
@@ -54,6 +56,10 @@ const Auth = (props) => {
             value: "",
             isValid: false,
           },
+          image: {
+            value: null,
+            isValid: false,
+          }
         },
         false
       );
@@ -63,7 +69,7 @@ const Auth = (props) => {
 
   const authSubmitHandler = async (event) => {
     event.preventDefault();
-
+    console.log(formState.inputs);
     if (isLoginMode) {
       try {
         const responseData = await sendRequest(
@@ -121,6 +127,7 @@ const Auth = (props) => {
               onInput={inputHandler}
             />
           )}
+          {!isLoginMode && <ImageUpload onInput={inputHandler} center id="image"/>}
           <Input
             id="email"
             element="input"
