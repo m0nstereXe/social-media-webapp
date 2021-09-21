@@ -10,6 +10,7 @@ import { useForm } from "../../shared/hooks/form-hook";
 import { AuthContext } from "../../shared/context/auth-context";
 import {
   VALIDATOR_EMAIL,
+  VALIDATOR_MINLENGTH,
   VALIDATOR_REQUIRE,
 } from "../../shared/util/validators";
 import "./Auth.css";
@@ -134,8 +135,8 @@ const Auth = (props) => {
             element="input"
             type="password"
             label="Password"
-            validators={[VALIDATOR_REQUIRE()]}
-            errorText="Please enter a valid Password."
+            validators={[VALIDATOR_MINLENGTH(6)]}
+            errorText="Please enter a valid Password. (At least 6 characters)"
             onInput={inputHandler}
           />
           <Button type="submit" disabled={!formState.isValid}>
