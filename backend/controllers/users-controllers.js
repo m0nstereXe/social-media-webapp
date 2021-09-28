@@ -1,4 +1,3 @@
-
 const { validationResult } = require("express-validator");
 
 const HttpError = require("../models/http-error");
@@ -42,10 +41,9 @@ const signup = async (req, res, next) => {
   const createdUser = new User({
     name,
     email,
-    image:
-      "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/160/twitter/233/orangutan_1f9a7.png",
+    image: req.file.path,
     password,
-    places: []
+    places: [],
   });
 
   console.log(createdUser);
@@ -75,7 +73,10 @@ const login = async (req, res, next) => {
     return next(new HttpError("Invalid Credentials!!!!", 401));
   }
 
-  res.json({ message: "logged in!",user: existingUser.toObject({getters: true})});
+  res.json({
+    message: "logged in!",
+    user: existingUser.toObject({ getters: true }),
+  });
 };
 
 exports.getUsers = getUsers;
